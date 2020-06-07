@@ -32,7 +32,6 @@ const reportSchema = new mongoose.Schema({
   },
   cityName: {
     type: String,
-    //required: true,
     minlength: 0,
     maxlength: 100,
   },

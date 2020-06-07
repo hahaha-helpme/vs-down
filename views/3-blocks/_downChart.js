@@ -1,8 +1,22 @@
 const ctx = document.getElementById('downChart').getContext('2d')
-
 const timeReportsSequence = datalayer.serviceView.downChart.timeReportsSequence
 
-const maxTimeValue = Math.max.apply(Math, timeReportsSequence.map(function(object) { return Date.parse(object.time); }))
+let getRoundedDate = (minutes, d=new Date()) => {
+  let ms = 1000 * 60 * minutes; 
+  let roundedDate = new Date(Math.round(d.getTime() / ms) * ms);
+  return roundedDate
+}
+
+let maxTimeValue
+if(timeReportsSequence.length === 0) {
+  maxTimeValue = Math.max.apply(Math, timeReportsSequence.map(function(object) { return Date.parse(object.time); }))
+ } else {
+  maxTimeValue = getRoundedDate(1)
+  }
+  console.log(getRoundedDate(1))
+  console.log(maxTimeValue)
+
+
 // deze waardes zouden eigenlijk in een config file moeten zitten
 const sequenceLength = 72;
 const lastNumHours = 12;
@@ -12,7 +26,6 @@ const msPerMinute = 60000;
 // add missing dates to sequence
 for (let i = 0; i < sequenceLength; i++) {
   let sequenceDate = new Date(maxTimeValue - (i * msPerMinute * timeBlockLengthInMinutes)).toISOString();
-  let reportCount = 0;
   let conditinal = timeReportsSequence.some(e => e.time === sequenceDate)
   if(!conditinal){
     timeReportsSequence.push({count:0,time:sequenceDate})

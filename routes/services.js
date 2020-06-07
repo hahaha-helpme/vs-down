@@ -45,42 +45,44 @@ router.get('/', async (req, res, next) => {
 
     const pageDatalayer = page.viewLocals.body.datalayer
     
-    let reportsCountsArr = await Report.getDatalayerServiceStatus(res);
-    const minutesInHour = 60;
-    const hoursInDay = 24;
-    const selectionNumDays = 10;
-    const intervalInMinutes = 10;
-    const totalCountOfIntervals = (selectionNumDays * hoursInDay * minutesInHour) / intervalInMinutes
-    
+    let reportsCountsArr = await Report.getDatalayerServiceStatus(res)
+    reportsCountsArr =[];
     // finding upper control limit for c chart
 
-    let summedTotalCount = 0;
-    reportsCountsArr.forEach(obj => {
-      summedTotalCount += obj.count;
-    })
-    let numberOfReports = reportsCountsArr.length;
-    
-    const xbar = summedTotalCount/numberOfReports;
-    const upperControlLimit = xbar + 3 * Math.sqrt(xbar);
-    const numberOfReportsInterval = reportsCountsArr[0].count
-    
-    // setting datalayer service status
-    if(upperControlLimit > numberOfReportsInterval){
-      pageDatalayer.service.status = 0
-    } else {
-      pageDatalayer.service.status = 1
-    }
+    if(reportsCountsArr.length !== 0){
+      let summedTotalCount = 0;
+      let numberOfReports = reportsCountsArr.length;
 
+      reportsCountsArr.forEach(obj => {
+        summedTotalCount += obj.count;
+      })
+      
+      const centerline = summedTotalCount/numberOfReports;
+      const upperControlLimit = centerline + 3 * Math.sqrt(centerline);
+      const latestCountOfreports = reportsCountsArr[0].count
+
+      // setting datalayer service status
+      if(upperControlLimit > latestCountOfreports){
+        pageDatalayer.service.status = 0
+      } else {
+        pageDatalayer.service.status = 1
+      }
+    } else {
+        pageDatalayer.service.status = 0
+    }
     
     pageDatalayer.serviceView.downChart.timeReportsSequence = await Report.getDatalayerNumberOfReports(res); 
     
-    
-
+  
     const pageHeader = page.viewLocals.body.header
     pageHeader.text.header = page.getHeaderTitle
-
     
+    // console.log(page.viewLocals.body.about)
+    // console.log('---------------------------------------------------------------------')
+    // console.log(servicesController.locals.viewLocals.body.about)
+
     //res.json(page)
+    //res.json(servicesController.locals)
     res.render('service', page);
     //res.render('service', servicesController.locals); // all je alles wilt zien gebruik dan servicesController
   } catch (err) {
