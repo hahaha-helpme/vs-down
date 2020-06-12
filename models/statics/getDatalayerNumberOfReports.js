@@ -6,20 +6,17 @@ module.exports = function (schema, schemaBaseReferences, schemaAdditionalReferen
 
     const { type } = schemaAdditionalReferences;
 
-    // deze waarde zouden eigenlijk in een soort config file moeten zitten
-    const msPerMinute = 60000;
-    const minutesInHour = 60;
-    const hoursInDay = 24;
-    const selectionNumDays = 0.5;
-    const intervalInMinutes = 10;
-    
+    // deze waarde zouden eigenlijk in een soort config file moeten zitten    
+    const timeBlockLengthInMinutes = 10;
+    const selectionHours = 12;
+
     const getCurrentMinute = () =>{
       const currentDate = new Date();
       const elapsedMinutesCurrentHour = currentDate.getMinutes();
       const lastDigit = +elapsedMinutesCurrentHour.toString().split("").pop();
       return lastDigit
     }
-    
+
     const query = {
       [type]: "report-without-description",
       [languageCode]: reqLanguageCode,
@@ -27,7 +24,8 @@ module.exports = function (schema, schemaBaseReferences, schemaAdditionalReferen
       [nameHyphen]: reqServiceName,
       [cityName]: reqCityName,
       createdAt: {
-        $gte: new Date(Date.now() - msPerMinute * minutesInHour * hoursInDay * selectionNumDays),
+        $gte: new Date(Date.now() - 60000 * 60 * selectionHours),
+        $lt: new Date(),
       },
     };
 
@@ -36,7 +34,7 @@ module.exports = function (schema, schemaBaseReferences, schemaAdditionalReferen
         $toDate: {
           $subtract: [
             { $toLong: "$createdAt" }, 
-            { $mod: [{ $toLong: { $subtract: ["$createdAt", getCurrentMinute() * msPerMinute] } }, msPerMinute * intervalInMinutes] }],
+            { $mod: [{ $toLong: { $subtract: ["$createdAt", getCurrentMinute() * 60000] } }, 60000 * timeBlockLengthInMinutes] }],
         },
       },
       count: { $sum: 1 },

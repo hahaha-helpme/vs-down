@@ -1,26 +1,93 @@
 const express = require('express')
 const router = express.Router()
 
-const servicesController = require('../views/0-views/service/pug.config.js')
-
 const createError = require('http-errors')
 
-const mongoose = require('mongoose')
 const Service = require('../models/service')
 const Report = require('../models/report')
 
-/* GET service page. */
+//const servicesController = require('../views/0-views/service/pug.config.js')
+
 router.get('/', async (req, res, next) => {
   try {
-    const page = await Service.getViewLocals(res)
+    let page = await Service.getViewLocals(res)
     if (!page) {next(createError(404, 'We can not find this page.'))}
 
+     // ** datalayer **
+     const pageDatalayer = page.viewLocals.body.datalayer
+
+     // finding upper control limit for c chart
+     let reportsCountsArr = await Report.getDatalayerServiceStatus(res)
+     if(reportsCountsArr.length !== 0){
+       let summedTotalCount = 0;
+       let numberOfReports = reportsCountsArr.length;
+ 
+       reportsCountsArr.forEach(obj => {
+         summedTotalCount += obj.count;
+       })
+       
+       const centerline = summedTotalCount/numberOfReports;
+       const upperControlLimit = centerline + 3 * Math.sqrt(centerline);
+       const latestCountOfreports = reportsCountsArr[0].count
+ 
+       // setting datalayer service status
+       if(upperControlLimit > latestCountOfreports){
+         pageDatalayer.service.status = 0
+       } else {
+         pageDatalayer.service.status = 1
+       }
+     } else {
+         pageDatalayer.service.status = 0
+     }
+     
+ 
+     let timeReportsSequence = await Report.getDatalayerNumberOfReports(res); 
+ 
+     // deze waardes zouden eigenlijk in een config file moeten zitten
+     const msPerMinute = 60000;
+     const minutesInHour = 60;
+     const timeBlockLengthInMinutes = 10;
+     const selectionHours = 12; 
+     const sequenceLength = (selectionHours * minutesInHour)/timeBlockLengthInMinutes ;
+    
+     // if sequence is totally empty add current time
+     if(timeReportsSequence.length === 0) {
+       timeReportsSequence.push({count:0, time:new Date().toISOString()})
+     } else{
+     // add 10 minutes to all times in sequence
+     timeReportsSequence.forEach(date => {
+       date.time = new Date(Date.parse(date.time) + (timeBlockLengthInMinutes * msPerMinute))
+     })
+     }
+ 
+     // add missing dates to sequence
+     let maxTimeValue = Math.max.apply(Math, timeReportsSequence.map(function(object) { return Date.parse(object.time); }))
+     for (let i = 0; i < sequenceLength; i++) {
+       let sequenceDate = new Date(maxTimeValue - (i * msPerMinute * timeBlockLengthInMinutes)).toISOString();
+       let conditinal = timeReportsSequence.some(e => e.time === sequenceDate)
+       if(!conditinal){
+         timeReportsSequence.push({count:0,time:sequenceDate})
+       }  
+     }
+    
+     // sort sequence
+     timeReportsSequence.sort(function compare(b, a) {
+       var dateA = new Date(a.time);
+       var dateB = new Date(b.time);
+       return dateA - dateB;
+     });
+ 
+     pageDatalayer.serviceView.downChart.timeReportsSequence = timeReportsSequence   
+
+    // ** doctype ** 
     page.viewLocals.doctype.language = page.getHeadLanguage
 
+    // ** head **
     const pageHead = page.viewLocals.head
-    pageHead.relAlternate = await Service.getHeadRelAlternate(req, res)
     pageHead.canonical = page.getHeadCanonical(req)
+    pageHead.relAlternate = await Service.getHeadRelAlternate(req, res)
 
+    // ** nav **
     const pageNav = page.viewLocals.body.nav
     pageNav.links.logo = page.getNavlogoLink(req, res)
     pageNav.links.header = page.getNavHeaderLink(req, res)
@@ -28,63 +95,43 @@ router.get('/', async (req, res, next) => {
     pageNav.images.flag = page.getNavCountryFlagImg
     pageNav.alt.flag = page.getNavCountryFlagAlt
 
-    // drie of meer voor paragraaf met dynamische gegevens voor company detail //combinatie van (static + cron + unieke tekst)
+    // ** header **
+    const pageHeader = page.viewLocals.body.header
+    pageHeader.text.header = page.getHeaderTitle
 
+    // ** downChart **
+
+    // ** reportProblem **
+
+    // ** serviceDetails **
     const pageServiceDetails = page.viewLocals.body.serviceDetails
+    // hier missen functies die content ophalen
     pageServiceDetails.images.service = page.getServiceDetailsLogoImg
     pageServiceDetails.alt.service = page.getServiceDetailsLogoAlt
 
-    // zes of meer voor paragraaf met dynamische gegevens voor accordion answers //combinatie van (static + cron + unieke tekst)
+    // ** faq **    
+    // hier missen functies die content ophalen
+
+    // ** about **
     const pageAbout = page.viewLocals.body.about
     pageAbout.links.breadcrumb = page.getAboutBreadcrumb(req, res)
 
+    // ** modal **
     const pageModal = page.viewLocals.body.modal
     pageModal.geolocation.flags = await Service.getModalGeolocationFlags(req, res)
     pageModal.positionPushing.flags = await Service.getModalPositionPushingFlags(req, res)
     pageModal.countryAlternative.flags = await Service.getModalCountryAlternativeFlags(req, res)
 
-    const pageDatalayer = page.viewLocals.body.datalayer
-    
-    let reportsCountsArr = await Report.getDatalayerServiceStatus(res)
-    reportsCountsArr =[];
-    // finding upper control limit for c chart
+    // ** advertisment **
 
-    if(reportsCountsArr.length !== 0){
-      let summedTotalCount = 0;
-      let numberOfReports = reportsCountsArr.length;
+    // ** commentSection ** 
 
-      reportsCountsArr.forEach(obj => {
-        summedTotalCount += obj.count;
-      })
-      
-      const centerline = summedTotalCount/numberOfReports;
-      const upperControlLimit = centerline + 3 * Math.sqrt(centerline);
-      const latestCountOfreports = reportsCountsArr[0].count
-
-      // setting datalayer service status
-      if(upperControlLimit > latestCountOfreports){
-        pageDatalayer.service.status = 0
-      } else {
-        pageDatalayer.service.status = 1
-      }
-    } else {
-        pageDatalayer.service.status = 0
-    }
-    
-    pageDatalayer.serviceView.downChart.timeReportsSequence = await Report.getDatalayerNumberOfReports(res); 
-    
-  
-    const pageHeader = page.viewLocals.body.header
-    pageHeader.text.header = page.getHeaderTitle
-    
-    // console.log(page.viewLocals.body.about)
-    // console.log('---------------------------------------------------------------------')
-    // console.log(servicesController.locals.viewLocals.body.about)
+    page = page.toObject()
 
     //res.json(page)
     //res.json(servicesController.locals)
     res.render('service', page);
-    //res.render('service', servicesController.locals); // all je alles wilt zien gebruik dan servicesController
+    //res.render('service', servicesController.locals); 
   } catch (err) {
     console.error(err)
   }

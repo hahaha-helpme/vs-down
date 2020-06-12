@@ -40,7 +40,7 @@ const reportSchema = new mongoose.Schema({
     minlength: 0,
     maxlength: 100,
   },
-    createdAt: { // verwijder dit in productie
+  createdAt: { // verwijder dit in productie
     type: Date,
   },
   updatedAt: {
@@ -52,7 +52,7 @@ reportSchema.set('autoIndex', false)
 reportSchema.set('autoCreate', false)
 reportSchema.set('minimize', false)
 // reportSchema.set('timestamps', {
-//   currentTime: () => new Date().toISOString() // is het echt iso tijd????
+//   currentTime: () => new Date().toISOString() // dit is GMT+0000 en dus wat je nodig hebt
 // })
 
 const schemaBaseReferences = {

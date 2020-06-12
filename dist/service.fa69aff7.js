@@ -6425,62 +6425,7 @@ setMarkColor(datalayer.service.status); //           createHeaderText: function(
 //           }
 },{"../0-views/service/pug.config.js":"boWg"}],"vhB5":[function(require,module,exports) {
 var ctx = document.getElementById('downChart').getContext('2d');
-var timeReportsSequence = datalayer.serviceView.downChart.timeReportsSequence;
-
-var getRoundedDate = function getRoundedDate(minutes) {
-  var d = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : new Date();
-  var ms = 1000 * 60 * minutes;
-  var roundedDate = new Date(Math.round(d.getTime() / ms) * ms);
-  return roundedDate;
-};
-
-var maxTimeValue;
-console.log(timeReportsSequence);
-
-if (timeReportsSequence.length === 0) {
-  maxTimeValue = Math.max.apply(Math, timeReportsSequence.map(function (object) {
-    return Date.parse(object.time);
-  }));
-} else {
-  maxTimeValue = getRoundedDate(1);
-}
-
-console.log(getRoundedDate(1));
-console.log(maxTimeValue); // deze waardes zouden eigenlijk in een config file moeten zitten
-
-var sequenceLength = 72;
-var lastNumHours = 12;
-var timeBlockLengthInMinutes = 10;
-var msPerMinute = 60000; // add missing dates to sequence
-
-var _loop = function _loop(i) {
-  var sequenceDate = new Date(maxTimeValue - i * msPerMinute * timeBlockLengthInMinutes).toISOString();
-  var conditinal = timeReportsSequence.some(function (e) {
-    return e.time === sequenceDate;
-  });
-
-  if (!conditinal) {
-    timeReportsSequence.push({
-      count: 0,
-      time: sequenceDate
-    });
-  }
-};
-
-for (var i = 0; i < sequenceLength; i++) {
-  _loop(i);
-} // add 10 minutes to all times in sequence
-
-
-timeReportsSequence.forEach(function (date) {
-  date.time = new Date(Date.parse(date.time) + timeBlockLengthInMinutes * msPerMinute);
-}); // sort sequence
-
-timeReportsSequence.sort(function compare(b, a) {
-  var dateA = new Date(a.time);
-  var dateB = new Date(b.time);
-  return dateA - dateB;
-}); // quence to localtime en split to arrays
+var timeReportsSequence = datalayer.serviceView.downChart.timeReportsSequence; // sequence to localtime en split to arrays
 
 var localesOptions = {
   hour: '2-digit',

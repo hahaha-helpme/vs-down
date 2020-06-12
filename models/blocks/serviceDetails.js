@@ -6,7 +6,7 @@ module.exports = {
         2: String,
         3: String,
         4: String
-      }
+      },
     },
     images: {
       service: String

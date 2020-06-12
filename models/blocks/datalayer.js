@@ -71,14 +71,10 @@ module.exports = {
           tooltipLabel: String,
           timeReportsSequence: Array,
         },
-
-
+ },
       // ************ homepage ************ //
       homepageView:{
         header: String,
       },
-
-  },
-
 
 }

@@ -20,7 +20,6 @@ module.exports = function(schema, schemaBaseReferences, schemaAdditionalReferenc
       reqLanguageCode,
       reqCountryCode,
       reqServiceName,
-      reqCityName
     } = res.locals
 
     const {

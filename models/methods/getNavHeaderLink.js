@@ -2,8 +2,7 @@ module.exports = function (schema) {
   schema.methods.getNavHeaderLink = function (req, res) {
     const {
       hostname,
-      protocol,
-      originalUrl
+      protocol
     } = req
 
     const {

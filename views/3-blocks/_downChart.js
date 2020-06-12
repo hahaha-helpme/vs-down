@@ -1,51 +1,7 @@
 const ctx = document.getElementById('downChart').getContext('2d')
-const timeReportsSequence = datalayer.serviceView.downChart.timeReportsSequence
+let timeReportsSequence = datalayer.serviceView.downChart.timeReportsSequence
 
-let getRoundedDate = (minutes, d=new Date()) => {
-  let ms = 1000 * 60 * minutes; 
-  let roundedDate = new Date(Math.round(d.getTime() / ms) * ms);
-  return roundedDate
-}
-
-let maxTimeValue
-if(timeReportsSequence.length === 0) {
-  maxTimeValue = Math.max.apply(Math, timeReportsSequence.map(function(object) { return Date.parse(object.time); }))
- } else {
-  maxTimeValue = getRoundedDate(1)
-  }
-  console.log(getRoundedDate(1))
-  console.log(maxTimeValue)
-
-
-// deze waardes zouden eigenlijk in een config file moeten zitten
-const sequenceLength = 72;
-const lastNumHours = 12;
-const timeBlockLengthInMinutes = 10;
-const msPerMinute = 60000;
-
-// add missing dates to sequence
-for (let i = 0; i < sequenceLength; i++) {
-  let sequenceDate = new Date(maxTimeValue - (i * msPerMinute * timeBlockLengthInMinutes)).toISOString();
-  let conditinal = timeReportsSequence.some(e => e.time === sequenceDate)
-  if(!conditinal){
-    timeReportsSequence.push({count:0,time:sequenceDate})
-  }  
-}
-
-// add 10 minutes to all times in sequence
-timeReportsSequence.forEach(date => {
-  date.time = new Date(Date.parse(date.time) + (timeBlockLengthInMinutes * msPerMinute))
-})
-
-// sort sequence
-timeReportsSequence.sort(function compare(b, a) {
-  var dateA = new Date(a.time);
-  var dateB = new Date(b.time);
-  return dateA - dateB;
-});
-
-
-// quence to localtime en split to arrays
+// sequence to localtime en split to arrays
 const localesOptions = {
   hour: '2-digit', 
   minute: '2-digit',

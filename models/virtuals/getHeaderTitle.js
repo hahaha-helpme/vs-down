@@ -1,9 +1,10 @@
 module.exports = function (schema) {
   schema.virtual('getHeaderTitle').get(function () {
-    const company = this.viewLocals.body.datalayer.service.nameCase
+    const nameHyphen = this.viewLocals.body.datalayer.service.nameHyphen
     const currentStatus = this.viewLocals.body.datalayer.service.status
+    const company = this.viewLocals.body.datalayer.service.nameCase // nodig voor template strings
 
-    if(currentStatus === null){
+    if(!nameHyphen){
       return this.viewLocals.body.datalayer.homepageView.header
 
     } else if(currentStatus === 0){
@@ -19,6 +20,7 @@ module.exports = function (schema) {
       return eval('`' + isDownStr + '`');
 
     }
+
     
   })
 }

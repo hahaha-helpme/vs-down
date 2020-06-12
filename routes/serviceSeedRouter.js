@@ -95,10 +95,10 @@ router.get('/', async (req, res, next) => {
                     2: seed.faq_text_accordion_answer_A2
                   }
                 }, {
-                  question: seed.faq_text_accordion_question_A1,
+                  question: seed.faq_text_accordion_question_B1,
                   answer: {
-                    1: seed.faq_text_accordion_answer_A1,
-                    2: seed.faq_text_accordion_answer_A2
+                    1: seed.faq_text_accordion_answer_B1,
+                    2: seed.faq_text_accordion_answer_B2
                   }
                 }, {
                   question: seed.faq_text_accordion_question_C1,
