@@ -9,9 +9,9 @@ const createError = require('http-errors')
 const compression = require('compression')
 const logger = require('morgan')
 
-const reportsSeedRouter = require('./routes/reportsSeedRouter') // verwijder mij later
-const serviceSeedRouter = require('./routes/serviceSeedRouter') // verwijder mij later
-//const homepageSeedRouter = require('./routes/homepageSeedRouter') // verwijder mij later
+
+const seedRouter = require('./routes/seeding/seedRouter') // verwijder mij later
+
 const homepageRouter = require('./routes/homepages')
 const serviceRouter = require('./routes/services')
 
@@ -80,9 +80,8 @@ const putParamsOnLocals = (req, res, next) => {
   next()
 }
 
-app.use('/seed-database-with-reports', reportsSeedRouter) // verwijder mij later
-app.use('/seed-database-with-services', serviceSeedRouter) // verwijder mij later
-//app.use('/seed-database-with-homepages', homepageSeedRouter) // verwijder mij later
+app.use('/seed-the-database', seedRouter)
+
 app.use(`/:languageCountry(${languageRegex}-${countryRegex})/:serviceName(${serviceRegex})/:cityName(${cityRegex})`, putParamsOnLocals, serviceRouter)
 app.use(`/:languageCountry(${languageRegex}-${countryRegex})/:serviceName(${serviceRegex})`, putParamsOnLocals, serviceRouter)
 app.use(`/:languageCountry(${languageRegex}-${countryRegex})|(${homepageRegex})`, putParamsOnLocals, homepageRouter)

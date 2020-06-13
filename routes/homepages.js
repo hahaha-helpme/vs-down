@@ -12,7 +12,7 @@ router.get('/', async (req, res, next)=> {
 
     let page = await Homepage.getViewLocals(res)
     if (!page) {next(createError(404, 'We can not find this page.'))}
-    
+    console.log(page)
     res.json(page)
     // ** datalayer **
 
